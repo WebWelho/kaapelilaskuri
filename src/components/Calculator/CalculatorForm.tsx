@@ -8,10 +8,6 @@ import type {
   LoadType,
   ProtectionType,
 } from "@/lib/electrical/types";
-import {
-  INSTALL_METHOD_DESCRIPTIONS,
-  PROTECTION_DESCRIPTIONS,
-} from "@/lib/electrical/constants";
 import { calculate } from "@/lib/electrical";
 import { PRESETS, type Preset } from "@/lib/electrical/presets";
 import { ResultPanel } from "./ResultPanel";
@@ -28,31 +24,34 @@ const DEFAULT_INPUT: CalcInput = {
   protectionType: "gG",
 };
 
-const INSTALL_METHOD_ICONS: Record<InstallMethod, string> = {
-  A1: "⬜",
-  A2: "⬜",
-  B1: "🧱",
-  B2: "🧱",
-  C: "📎",
-  D1: "🌍",
-  D2: "🌍",
-  E: "🌬️",
-  F: "🔩",
-  G: "🔩",
-};
+const INSTALL_METHODS: {
+  key: InstallMethod;
+  label: string;
+  desc: string;
+}[] = [
+  { key: "A1", label: "A1", desc: "Putki eristeseinässä" },
+  { key: "A2", label: "A2", desc: "Kaapeli putki/seinä" },
+  { key: "B1", label: "B1", desc: "Putki seinällä" },
+  { key: "B2", label: "B2", desc: "Kaapeli putki/seinä" },
+  { key: "C", label: "C", desc: "Seinäpinnalla" },
+  { key: "D1", label: "D1", desc: "Maassa" },
+  { key: "D2", label: "D2", desc: "Putki maassa" },
+  { key: "E", label: "E", desc: "Vapaassa ilmassa" },
+  { key: "F", label: "F", desc: "Hylly (koskettaen)" },
+  { key: "G", label: "G", desc: "Hylly (välimatkalla)" },
+];
 
-const INSTALL_METHOD_SHORT: Record<InstallMethod, string> = {
-  A1: "Putki eristeseinässä",
-  A2: "Kaapeli putki/seinä",
-  B1: "Putki seinällä",
-  B2: "Kaapeli putki/seinä",
-  C: "Seinäpinnalla",
-  D1: "Maassa",
-  D2: "Putki maassa",
-  E: "Vapaassa ilmassa",
-  F: "Hylly (koskettaen)",
-  G: "Hylly (välimatkalla)",
-};
+const PROTECTION_OPTIONS: {
+  key: ProtectionType;
+  label: string;
+  desc: string;
+}[] = [
+  { key: "gG", label: "gG", desc: "Kahvasulake" },
+  { key: "MCB-B", label: "B", desc: "Yleiskäyttö" },
+  { key: "MCB-C", label: "C", desc: "Moottorit" },
+  { key: "MCB-D", label: "D", desc: "Muuntajat" },
+  { key: "MCB-K", label: "K", desc: "Teollisuus" },
+];
 
 export function CalculatorForm() {
   const [input, setInput] = useState<CalcInput>(DEFAULT_INPUT);
@@ -94,50 +93,44 @@ export function CalculatorForm() {
     <div className="space-y-6">
       {/* Presetit */}
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--muted)]">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">
           Yleisimmät kuormat
         </h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => handlePreset(preset)}
-              className={`group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all ${
-                activePreset === preset.id
-                  ? "border-[var(--accent)] bg-[var(--accent-light)] shadow-sm"
-                  : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--accent)] hover:shadow-sm"
-              }`}
-            >
-              <span className="text-xl leading-none">{preset.icon}</span>
-              <div className="min-w-0">
-                <div className="truncate text-sm font-medium">
-                  {preset.name}
+          {PRESETS.map((preset) => {
+            const active = activePreset === preset.id;
+            return (
+              <button
+                key={preset.id}
+                onClick={() => handlePreset(preset)}
+                className={`group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all ${
+                  active
+                    ? "border-[var(--border-accent)] bg-[var(--bg-card-hover)] shadow-[0_0_16px_var(--accent-glow)]"
+                    : "border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--border-medium)] hover:bg-[var(--bg-card-hover)]"
+                }`}
+              >
+                <span className="text-xl leading-none">{preset.icon}</span>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium text-[var(--text-primary)]">
+                    {preset.name}
+                  </div>
+                  <div className="truncate font-mono text-xs text-[var(--text-muted)]">
+                    {(preset.input.powerW ?? 0) / 1000} kW
+                  </div>
                 </div>
-                <div className="truncate text-xs text-[var(--muted)]">
-                  {(preset.input.powerW ?? 0) / 1000} kW
-                </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr,1fr]">
         {/* Lomake */}
         <div className="space-y-5">
-          {/* Kuorma */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--muted)]">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--accent-light)] text-xs font-bold text-[var(--accent-dark)]">
-                1
-              </span>
-              Kuorma
-            </h3>
+          {/* 1. Kuorma */}
+          <Card number={1} title="Kuorma">
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium">
-                  Teho (kW)
-                </span>
+              <InputField label="Teho (kW)">
                 <input
                   type="number"
                   inputMode="decimal"
@@ -149,27 +142,33 @@ export function CalculatorForm() {
                     update({ powerW: isNaN(v) ? 0 : v * 1000 });
                     setActivePreset(null);
                   }}
-                  className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 font-mono text-lg font-semibold tabular-nums focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-light)] focus:outline-none"
+                  className="input-field font-mono text-lg font-semibold"
                 />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium">Vaihe</span>
-                <select
-                  value={input.phase}
-                  onChange={(e) => {
-                    update({ phase: e.target.value as Phase });
-                    setActivePreset(null);
-                  }}
-                  className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-light)] focus:outline-none"
-                >
-                  <option value="3-phase">3-vaihe (400 V)</option>
-                  <option value="1-phase">1-vaihe (230 V)</option>
-                </select>
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium">
-                  Tehokerroin (cos φ)
-                </span>
+              </InputField>
+
+              {/* Vaihe toggle */}
+              <InputField label="Vaihe">
+                <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
+                  {(["1-phase", "3-phase"] as Phase[]).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => {
+                        update({ phase: p });
+                        setActivePreset(null);
+                      }}
+                      className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                        input.phase === p
+                          ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
+                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                      }`}
+                    >
+                      {p === "1-phase" ? "1-vaihe" : "3-vaihe"}
+                    </button>
+                  ))}
+                </div>
+              </InputField>
+
+              <InputField label="Tehokerroin (cos φ)">
                 <input
                   type="number"
                   inputMode="decimal"
@@ -182,115 +181,99 @@ export function CalculatorForm() {
                     update({ cosPhi: isNaN(v) ? 1.0 : v });
                     setActivePreset(null);
                   }}
-                  className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 font-mono tabular-nums focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-light)] focus:outline-none"
+                  className="input-field font-mono"
                 />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium">
-                  Kuormatyyppi
-                </span>
-                <select
-                  value={input.loadType}
-                  onChange={(e) => {
-                    update({ loadType: e.target.value as LoadType });
-                    setActivePreset(null);
-                  }}
-                  className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-light)] focus:outline-none"
-                >
-                  <option value="general">Yleinen (max 5% ΔU)</option>
-                  <option value="lighting">Valaistus (max 3% ΔU)</option>
-                </select>
-              </label>
-            </div>
-          </div>
+              </InputField>
 
-          {/* Suojalaite */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--muted)]">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--accent-light)] text-xs font-bold text-[var(--accent-dark)]">
-                2
-              </span>
-              Suojalaite
-            </h3>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {(
-                Object.entries(PROTECTION_DESCRIPTIONS) as [
-                  ProtectionType,
-                  string,
-                ][]
-              ).map(([key, desc]) => (
-                <button
-                  key={key}
-                  onClick={() => {
-                    update({ protectionType: key });
-                    setActivePreset(null);
-                  }}
-                  className={`rounded-xl border px-3 py-2.5 text-left transition-all ${
-                    input.protectionType === key
-                      ? "border-[var(--accent)] bg-[var(--accent-light)] shadow-sm"
-                      : "border-[var(--border)] bg-[var(--surface-alt)] hover:border-[var(--accent)]"
-                  }`}
-                >
-                  <div className="text-sm font-semibold">
-                    {key === "gG" ? "gG" : key.replace("MCB-", "")}
-                  </div>
-                  <div className="mt-0.5 text-xs text-[var(--muted)]">
-                    {key === "gG"
-                      ? "Kahvasulake"
-                      : desc.replace(/.*\(/, "").replace(")", "")}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Asennus */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--muted)]">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--accent-light)] text-xs font-bold text-[var(--accent-dark)]">
-                3
-              </span>
-              Asennus
-            </h3>
-
-            {/* Asennustapavalitsin */}
-            <div className="mb-4">
-              <span className="mb-2 block text-sm font-medium">
-                Asennustapa
-              </span>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                {(Object.keys(INSTALL_METHOD_SHORT) as InstallMethod[]).map(
-                  (key) => (
+              {/* ΔU raja toggle */}
+              <InputField label="ΔU raja">
+                <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
+                  {(["general", "lighting"] as LoadType[]).map((lt) => (
                     <button
-                      key={key}
+                      key={lt}
                       onClick={() => {
-                        update({ installMethod: key });
+                        update({ loadType: lt });
                         setActivePreset(null);
                       }}
-                      className={`rounded-xl border px-2 py-2 text-center transition-all ${
-                        input.installMethod === key
-                          ? "border-[var(--accent)] bg-[var(--accent-light)] shadow-sm"
-                          : "border-[var(--border)] bg-[var(--surface-alt)] hover:border-[var(--accent)]"
+                      className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                        input.loadType === lt
+                          ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
+                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       }`}
                     >
-                      <div className="text-base leading-none">
-                        {INSTALL_METHOD_ICONS[key]}
-                      </div>
-                      <div className="mt-1 text-xs font-bold">{key}</div>
-                      <div className="mt-0.5 text-[10px] leading-tight text-[var(--muted)]">
-                        {INSTALL_METHOD_SHORT[key]}
-                      </div>
+                      {lt === "general" ? "5 %" : "3 %"}
                     </button>
-                  ),
-                )}
-              </div>
+                  ))}
+                </div>
+              </InputField>
+            </div>
+          </Card>
+
+          {/* 2. Suojalaite */}
+          <Card number={2} title="Suojalaite">
+            <div className="grid grid-cols-5 gap-2">
+              {PROTECTION_OPTIONS.map(({ key, label, desc }) => {
+                const active = input.protectionType === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      update({ protectionType: key });
+                      setActivePreset(null);
+                    }}
+                    className={`rounded-xl border px-2 py-3 text-center transition-all ${
+                      active
+                        ? "border-[var(--border-accent)] bg-[var(--bg-card-hover)] shadow-[0_0_12px_var(--accent-glow)]"
+                        : "border-[var(--border-subtle)] bg-[var(--bg-input)] hover:border-[var(--border-medium)]"
+                    }`}
+                  >
+                    <div
+                      className={`font-mono text-base font-bold ${active ? "text-[var(--text-accent)]" : "text-[var(--text-primary)]"}`}
+                    >
+                      {label}
+                    </div>
+                    <div className="mt-0.5 text-[10px] text-[var(--text-muted)]">
+                      {desc}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+
+          {/* 3. Asennus */}
+          <Card number={3} title="Asennustapa">
+            <div className="mb-4 grid grid-cols-5 gap-2">
+              {INSTALL_METHODS.map(({ key, label, desc }) => {
+                const active = input.installMethod === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      update({ installMethod: key });
+                      setActivePreset(null);
+                    }}
+                    className={`rounded-xl border px-1.5 py-2 text-center transition-all ${
+                      active
+                        ? "border-[var(--border-accent)] bg-[var(--bg-card-hover)] shadow-[0_0_12px_var(--accent-glow)]"
+                        : "border-[var(--border-subtle)] bg-[var(--bg-input)] hover:border-[var(--border-medium)]"
+                    }`}
+                  >
+                    <div
+                      className={`font-mono text-xs font-bold ${active ? "text-[var(--text-accent)]" : "text-[var(--text-primary)]"}`}
+                    >
+                      {label}
+                    </div>
+                    <div className="mt-0.5 text-[9px] leading-tight text-[var(--text-muted)]">
+                      {desc}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium">
-                  Pituus (m)
-                </span>
+              <InputField label="Pituus (m)">
                 <input
                   type="number"
                   inputMode="numeric"
@@ -302,13 +285,10 @@ export function CalculatorForm() {
                     update({ cableLengthM: isNaN(v) ? 0 : v });
                     setActivePreset(null);
                   }}
-                  className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 font-mono tabular-nums focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-light)] focus:outline-none"
+                  className="input-field font-mono"
                 />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium">
-                  Lämpötila (°C)
-                </span>
+              </InputField>
+              <InputField label="Lämpötila (°C)">
                 <input
                   type="number"
                   inputMode="numeric"
@@ -321,13 +301,10 @@ export function CalculatorForm() {
                     update({ ambientTempC: isNaN(v) ? 25 : v });
                     setActivePreset(null);
                   }}
-                  className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 font-mono tabular-nums focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-light)] focus:outline-none"
+                  className="input-field font-mono"
                 />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium">
-                  Vierekkäiset piirit
-                </span>
+              </InputField>
+              <InputField label="Piirit">
                 <input
                   type="number"
                   inputMode="numeric"
@@ -340,33 +317,78 @@ export function CalculatorForm() {
                     update({ groupedCircuits: isNaN(v) ? 1 : v });
                     setActivePreset(null);
                   }}
-                  className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 font-mono tabular-nums focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-light)] focus:outline-none"
+                  className="input-field font-mono"
                 />
-              </label>
+              </InputField>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Tulokset */}
-        <div className="lg:sticky lg:top-6 lg:self-start">
+        <div className="lg:sticky lg:top-20 lg:self-start">
           {result.error && (
-            <div className="rounded-2xl border border-[var(--danger)] bg-[var(--danger-light)] p-5 text-sm">
-              <div className="font-semibold text-[var(--danger)]">Virhe</div>
-              <p className="mt-1">{result.error}</p>
+            <div className="rounded-2xl border border-[var(--text-warn)]/30 bg-[var(--text-warn)]/5 p-5 text-sm">
+              <div className="font-semibold text-[var(--text-warn)]">Virhe</div>
+              <p className="mt-1 text-[var(--text-secondary)]">
+                {result.error}
+              </p>
             </div>
           )}
           {result.data && <ResultPanel result={result.data} />}
           {!result.data && !result.error && (
-            <div className="flex h-64 items-center justify-center rounded-2xl border-2 border-dashed border-[var(--border)]">
-              <p className="text-center text-sm text-[var(--muted)]">
+            <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-[var(--border-medium)]">
+              <p className="text-center text-sm text-[var(--text-muted)]">
                 Syötä teho ja asennus&shy;parametrit
                 <br />
-                niin tulos päivittyy reaaliaikaisesti
+                <span className="text-xs">
+                  tulos päivittyy reaaliaikaisesti
+                </span>
               </p>
             </div>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── Helpers ── */
+
+function Card({
+  number,
+  title,
+  children,
+}: {
+  number: number;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5">
+      <h3 className="mb-4 flex items-center gap-2.5 text-sm font-semibold text-[var(--text-secondary)]">
+        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--text-accent)]/10 font-mono text-xs font-bold text-[var(--text-accent)]">
+          {number}
+        </span>
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+function InputField({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">
+        {label}
+      </span>
+      {children}
+    </label>
   );
 }

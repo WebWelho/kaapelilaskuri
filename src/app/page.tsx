@@ -3,31 +3,34 @@ import { CalculatorForm } from "@/components/Calculator/CalculatorForm";
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)] text-lg font-bold text-white">
+      {/* Header — sticky blur */}
+      <header className="sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 sm:px-6">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--text-accent)] to-cyan-600 text-lg font-bold text-white shadow-[0_0_20px_var(--accent-glow)]">
             ⚡
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight sm:text-xl">
+            <h1 className="text-base font-bold tracking-tight text-[var(--text-primary)] sm:text-lg">
               SähköAI — Kaapelimitoitus
             </h1>
-            <p className="text-xs text-[var(--muted)]">
-              Sulake &amp; kaapeli SFS 6000 -standardin mukaan
+            <p className="text-[11px] text-[var(--text-muted)]">
+              Sulake &amp; kaapeli · SFS 6000
             </p>
           </div>
           <div className="ml-auto">
-            <span className="rounded-full bg-[var(--accent-light)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-dark)]">
-              Beta
+            <span className="rounded-full border border-[var(--border-accent)] bg-[var(--accent-glow)] px-2.5 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-[var(--text-accent)]">
+              BETA
             </span>
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">
+
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6 sm:px-6">
         <CalculatorForm />
       </main>
-      <footer className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-center text-xs text-[var(--muted)]">
-        TPCore Oy — SähköAI Kaapelimitoitus v0.2
+
+      <footer className="border-t border-[var(--border-subtle)] px-4 py-4 text-center text-[11px] text-[var(--text-muted)]">
+        TPCore Oy · SähköAI v0.2
       </footer>
     </div>
   );
