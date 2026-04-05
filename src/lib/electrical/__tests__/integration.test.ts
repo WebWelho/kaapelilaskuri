@@ -143,6 +143,84 @@ describe("calculate — integraatiotesti", () => {
       loadType: "general",
     };
 
-    expect(() => calculate(input)).toThrow("ylittää suurimman sulakekoon");
+    expect(() => calculate(input)).toThrow("ylittää suurimman suojalaitteen");
+  });
+
+  it("MCB-B: 10 kW moottori, 3-vaihe, C-asennus", () => {
+    const input: CalcInput = {
+      powerW: 10000,
+      phase: "3-phase",
+      cosPhi: 0.85,
+      installMethod: "C",
+      cableLengthM: 20,
+      ambientTempC: 30,
+      groupedCircuits: 1,
+      loadType: "general",
+      protectionType: "MCB-C",
+    };
+
+    const result = calculate(input);
+
+    // 10000 / (√3 × 400 × 0.85) = 16.98 A → MCB C20
+    expect(result.currentA).toBeCloseTo(16.98, 1);
+    expect(result.fuseA).toBe(20);
+    expect(result.protectionType).toBe("MCB-C");
+    expect(result.protectionDescription).toBe("C20");
+    expect(result.voltageDropOk).toBe(true);
+  });
+
+  it("MCB-B: pistorasiapiiri 3.68 kW, 1-vaihe", () => {
+    const input: CalcInput = {
+      powerW: 3680,
+      phase: "1-phase",
+      cosPhi: 1.0,
+      installMethod: "C",
+      cableLengthM: 15,
+      ambientTempC: 30,
+      groupedCircuits: 1,
+      loadType: "general",
+      protectionType: "MCB-B",
+    };
+
+    const result = calculate(input);
+
+    // 3680 / 230 = 16 A → MCB B16
+    expect(result.fuseA).toBe(16);
+    expect(result.protectionType).toBe("MCB-B");
+    expect(result.protectionDescription).toBe("B16");
+  });
+
+  it("MCB heittää virheen yli 63 A virralle", () => {
+    const input: CalcInput = {
+      powerW: 20000,
+      phase: "1-phase",
+      cosPhi: 1.0,
+      installMethod: "C",
+      cableLengthM: 10,
+      ambientTempC: 30,
+      groupedCircuits: 1,
+      loadType: "general",
+      protectionType: "MCB-B",
+    };
+
+    // 20000 / 230 = 86.96 A → yli MCB-rajan
+    expect(() => calculate(input)).toThrow("ylittää suurimman suojalaitteen");
+  });
+
+  it("oletus on gG kun protectionType ei ole annettu", () => {
+    const input: CalcInput = {
+      powerW: 20000,
+      phase: "3-phase",
+      cosPhi: 1.0,
+      installMethod: "C",
+      cableLengthM: 30,
+      ambientTempC: 30,
+      groupedCircuits: 1,
+      loadType: "general",
+    };
+
+    const result = calculate(input);
+    expect(result.protectionType).toBe("gG");
+    expect(result.protectionDescription).toBe("32 A gG");
   });
 });

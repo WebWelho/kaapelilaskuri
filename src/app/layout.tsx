@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kaapelimitoitus — SFS 6000",
+  title: "SähköAI — Kaapelimitoitus | SFS 6000",
   description:
-    "Laske sulakekoko ja kaapelipoikkipinta SFS 6000 -standardin mukaan",
+    "Laske sulakekoko ja kaapelipoikkipinta SFS 6000 -standardin mukaan. Suomalainen ammattilaisten työkalu.",
 };
 
 export default function RootLayout({

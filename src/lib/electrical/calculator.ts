@@ -1,6 +1,13 @@
-import type { CrossSection, InstallMethod, Phase, CableType } from "./types";
+import type {
+  CrossSection,
+  InstallMethod,
+  Phase,
+  CableType,
+  ProtectionType,
+} from "./types";
 import {
   FUSE_SIZES,
+  MCB_SIZES,
   CROSS_SECTIONS,
   CAPACITY_2_CONDUCTORS,
   CAPACITY_3_CONDUCTORS,
@@ -28,6 +35,44 @@ export function selectFuse(currentA: number): number | null {
     if (fuse >= currentA) return fuse;
   }
   return null;
+}
+
+/** Valitse pienin riittävä MCB. Palauttaa null jos liian suuri virta. */
+export function selectMCB(currentA: number): number | null {
+  for (const mcb of MCB_SIZES) {
+    if (mcb >= currentA) return mcb;
+  }
+  return null;
+}
+
+/** Valitse suojalaite tyypin perusteella */
+export function selectProtection(
+  currentA: number,
+  protectionType: ProtectionType,
+): number | null {
+  if (protectionType === "gG") {
+    return selectFuse(currentA);
+  }
+  return selectMCB(currentA);
+}
+
+/** Suojalaitteen kuvaus tulokseen */
+export function getProtectionDescription(
+  protectionType: ProtectionType,
+  ratingA: number,
+): string {
+  switch (protectionType) {
+    case "gG":
+      return `${ratingA} A gG`;
+    case "MCB-B":
+      return `B${ratingA}`;
+    case "MCB-C":
+      return `C${ratingA}`;
+    case "MCB-D":
+      return `D${ratingA}`;
+    case "MCB-K":
+      return `K${ratingA}`;
+  }
 }
 
 /** Interpoloi korjauskerroin taulukosta */

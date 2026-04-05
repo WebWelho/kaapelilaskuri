@@ -33,10 +33,13 @@ export type CrossSection =
   | 240;
 
 /** Kaapelityypit */
-export type CableType = "MMJ" | "MCMK" | "AXMK" | "MK";
+export type CableType = "MMJ" | "MCMK" | "AXMK" | "AMCMK" | "MK";
 
 /** Kuormatyyppi (vaikuttaa jännitteenalenemarajaan) */
 export type LoadType = "general" | "lighting";
+
+/** Suojalaitetyyppi */
+export type ProtectionType = "gG" | "MCB-B" | "MCB-C" | "MCB-D" | "MCB-K";
 
 /** Laskurin syötteet */
 export interface CalcInput {
@@ -56,6 +59,8 @@ export interface CalcInput {
   groupedCircuits: number;
   /** Kuormatyyppi */
   loadType: LoadType;
+  /** Suojalaitetyyppi (oletus: gG) */
+  protectionType?: ProtectionType;
 }
 
 /** Laskurin tulos */
@@ -64,6 +69,10 @@ export interface CalcResult {
   currentA: number;
   /** Sulakekoko (A) */
   fuseA: number;
+  /** Suojalaitetyyppi */
+  protectionType: ProtectionType;
+  /** Suojalaitteen kuvaus */
+  protectionDescription: string;
   /** Kaapelin poikkipinta (mm²) */
   crossSectionMm2: CrossSection;
   /** Suositeltu kaapelityyppi */

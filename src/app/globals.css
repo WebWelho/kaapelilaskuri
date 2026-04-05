@@ -3,11 +3,19 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
-  --accent: #2563eb;
-  --accent-light: #dbeafe;
+  --accent: #f59e0b;
+  --accent-dark: #d97706;
+  --accent-light: #fef3c7;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --border: #e2e8f0;
+  --muted: #94a3b8;
   --success: #16a34a;
+  --success-light: #dcfce7;
   --warning: #d97706;
+  --warning-light: #fef9c3;
   --danger: #dc2626;
+  --danger-light: #fee2e2;
 }
 
 @theme inline {
@@ -19,10 +27,21 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f172a;
+    --background: #0c0f1a;
     --foreground: #e2e8f0;
-    --accent: #3b82f6;
-    --accent-light: #1e3a5f;
+    --accent: #fbbf24;
+    --accent-dark: #f59e0b;
+    --accent-light: #422006;
+    --surface: #1e293b;
+    --surface-alt: #151c2c;
+    --border: #334155;
+    --muted: #64748b;
+    --success: #22c55e;
+    --success-light: #052e16;
+    --warning: #f59e0b;
+    --warning-light: #422006;
+    --danger: #ef4444;
+    --danger-light: #450a0a;
   }
 }
 
@@ -30,4 +49,21 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+}
+
+/* Smooth transitions for interactive elements */
+input, select, button {
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
 }

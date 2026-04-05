@@ -1,7 +1,13 @@
-import type { CalcInput, CalcResult, CrossSection } from "./types";
+import type {
+  CalcInput,
+  CalcResult,
+  CrossSection,
+  ProtectionType,
+} from "./types";
 import {
   calculateCurrent,
-  selectFuse,
+  selectProtection,
+  getProtectionDescription,
   getTempCorrectionFactor,
   getGroupCorrectionFactor,
   selectCable,
@@ -17,15 +23,17 @@ export { CROSS_SECTIONS };
 /** Suorita koko mitoituslaskenta */
 export function calculate(input: CalcInput): CalcResult {
   const warnings: string[] = [];
+  const protectionType: ProtectionType = input.protectionType ?? "gG";
 
   // 1. Kuormitusvirta
   const currentA = calculateCurrent(input.powerW, input.phase, input.cosPhi);
 
-  // 2. Sulakevalinta
-  const fuseA = selectFuse(currentA);
+  // 2. Suojalaitteen valinta
+  const fuseA = selectProtection(currentA, protectionType);
   if (fuseA === null) {
+    const maxLabel = protectionType === "gG" ? "630 A (gG)" : "63 A (MCB)";
     throw new Error(
-      `Virta ${currentA.toFixed(1)} A ylittää suurimman sulakekoon (630 A)`,
+      `Virta ${currentA.toFixed(1)} A ylittää suurimman suojalaitteen ${maxLabel}`,
     );
   }
 
@@ -101,6 +109,8 @@ export function calculate(input: CalcInput): CalcResult {
   return {
     currentA,
     fuseA,
+    protectionType,
+    protectionDescription: getProtectionDescription(protectionType, fuseA),
     crossSectionMm2: crossSection as CrossSection,
     cableType,
     cableDescription,

@@ -2,35 +2,35 @@
 
 import type { CalcResult } from "@/lib/electrical";
 
-function StatCard({
+function BigStat({
   label,
   value,
   unit,
-  color = "blue",
+  variant = "default",
 }: {
   label: string;
   value: string | number;
   unit?: string;
-  color?: "blue" | "green" | "amber" | "red";
+  variant?: "default" | "success" | "warning" | "danger";
 }) {
-  const colors = {
-    blue: "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950",
-    green:
-      "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950",
-    amber:
-      "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950",
-    red: "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950",
+  const variantStyles = {
+    default: "border-[var(--border)] bg-[var(--surface)]",
+    success: "border-[color:var(--success)]/30 bg-[var(--success-light)]",
+    warning: "border-[color:var(--warning)]/30 bg-[var(--warning-light)]",
+    danger: "border-[color:var(--danger)]/30 bg-[var(--danger-light)]",
   };
 
   return (
-    <div className={`rounded-xl border p-4 ${colors[color]}`}>
-      <div className="text-sm font-medium text-slate-500 dark:text-slate-400">
+    <div className={`rounded-xl border p-4 ${variantStyles[variant]}`}>
+      <div className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
         {label}
       </div>
-      <div className="mt-1 flex items-baseline gap-1">
-        <span className="text-2xl font-bold font-mono">{value}</span>
+      <div className="mt-1.5 flex items-baseline gap-1.5">
+        <span className="font-mono text-2xl font-bold tabular-nums">
+          {value}
+        </span>
         {unit && (
-          <span className="text-sm text-slate-500 dark:text-slate-400">
+          <span className="text-sm font-medium text-[var(--muted)]">
             {unit}
           </span>
         )}
@@ -40,101 +40,107 @@ function StatCard({
 }
 
 export function ResultPanel({ result }: { result: CalcResult }) {
-  const vdColor = !result.voltageDropOk
-    ? "red"
+  const vdVariant = !result.voltageDropOk
+    ? "danger"
     : result.voltageDropPercent > result.voltageDropLimit * 0.8
-      ? "amber"
-      : "green";
+      ? "warning"
+      : "success";
 
   return (
-    <div className="space-y-6">
-      {/* Päätulokset */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <StatCard
+    <div className="space-y-4">
+      {/* Pääkaapeli — iso kortti */}
+      <div className="rounded-2xl border-2 border-[var(--accent)] bg-[var(--accent-light)] p-5">
+        <div className="text-xs font-semibold uppercase tracking-wider text-[var(--accent-dark)]">
+          Kaapelisuositus
+        </div>
+        <div className="mt-2 font-mono text-2xl font-bold sm:text-3xl">
+          {result.cableDescription}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-3 text-sm">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-[var(--surface)] px-2.5 py-1 font-medium">
+            {result.protectionDescription}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-lg bg-[var(--surface)] px-2.5 py-1 text-[var(--muted)]">
+            {result.cableType} · {result.actualCapacityA} A kuormitettavuus
+          </span>
+        </div>
+      </div>
+
+      {/* Avainluvut */}
+      <div className="grid grid-cols-2 gap-3">
+        <BigStat
           label="Kuormitusvirta"
           value={result.currentA.toFixed(1)}
           unit="A"
         />
-        <StatCard
-          label="Sulakekoko"
-          value={result.fuseA}
-          unit="A"
-          color="blue"
+        <BigStat
+          label="Suojalaite"
+          value={result.protectionDescription}
+          variant="default"
         />
-        <StatCard
-          label="Kaapelipoikkipinta"
+        <BigStat
+          label="Poikkipinta"
           value={result.crossSectionMm2}
           unit="mm²"
-          color="green"
+          variant="success"
         />
-        <StatCard
+        <BigStat
           label="Jännitteenalenema"
           value={result.voltageDropPercent.toFixed(2)}
-          unit={`% (max ${result.voltageDropLimit}%)`}
-          color={vdColor}
+          unit={`% / ${result.voltageDropLimit}%`}
+          variant={vdVariant}
         />
-      </div>
-
-      {/* Kaapelisuositus */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
-        <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-          Kaapelisuositus
-        </h3>
-        <p className="mt-2 text-xl font-bold font-mono">
-          {result.cableDescription}
-        </p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Kaapelityyppi: {result.cableType} — Kuormitettavuus:{" "}
-          {result.actualCapacityA} A
-        </p>
       </div>
 
       {/* Korjauskertoimet */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
-        <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+        <div className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
           Korjauskertoimet
-        </h3>
-        <div className="mt-3 grid grid-cols-2 gap-y-2 text-sm">
-          <span className="text-slate-500 dark:text-slate-400">
-            Lämpötilakerroin
-          </span>
-          <span className="font-mono font-medium">
-            {result.tempCorrectionFactor.toFixed(3)}
-          </span>
-          <span className="text-slate-500 dark:text-slate-400">
-            Ryhmityskerroin
-          </span>
-          <span className="font-mono font-medium">
-            {result.groupCorrectionFactor.toFixed(3)}
-          </span>
-          <span className="text-slate-500 dark:text-slate-400">
-            Korjattu vaatimus
-          </span>
-          <span className="font-mono font-medium">
-            {result.correctedCapacityA.toFixed(1)} A
-          </span>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-3 text-center">
+          <div>
+            <div className="font-mono text-lg font-bold tabular-nums">
+              {result.tempCorrectionFactor.toFixed(2)}
+            </div>
+            <div className="text-xs text-[var(--muted)]">Lämpötila</div>
+          </div>
+          <div>
+            <div className="font-mono text-lg font-bold tabular-nums">
+              {result.groupCorrectionFactor.toFixed(2)}
+            </div>
+            <div className="text-xs text-[var(--muted)]">Ryhmitys</div>
+          </div>
+          <div>
+            <div className="font-mono text-lg font-bold tabular-nums">
+              {result.correctedCapacityA.toFixed(1)}
+            </div>
+            <div className="text-xs text-[var(--muted)]">Vaatimus (A)</div>
+          </div>
         </div>
       </div>
 
       {/* Varoitukset */}
       {result.warnings.length > 0 && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 p-5 dark:border-amber-700 dark:bg-amber-950">
-          <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+        <div className="rounded-2xl border border-[color:var(--warning)]/30 bg-[var(--warning-light)] p-4">
+          <div className="text-xs font-semibold uppercase tracking-wider text-[var(--warning)]">
             Huomautukset
-          </h3>
-          <ul className="mt-2 space-y-1 text-sm text-amber-700 dark:text-amber-300">
+          </div>
+          <ul className="mt-2 space-y-1 text-sm">
             {result.warnings.map((w, i) => (
-              <li key={i}>• {w}</li>
+              <li key={i} className="flex gap-2">
+                <span className="shrink-0">⚠️</span>
+                <span>{w}</span>
+              </li>
             ))}
           </ul>
         </div>
       )}
 
       {/* Disclaimer */}
-      <p className="text-xs text-slate-400 dark:text-slate-500">
-        Laskelma perustuu SFS 6000 -standardin taulukoihin (kupari, PVC).
-        Tarkista aina lopullinen mitoitus standardikirjasta. Työkalu ei korvaa
-        sähkösuunnittelijan ammattitaitoa.
+      <p className="text-[11px] leading-relaxed text-[var(--muted)]">
+        Laskelma perustuu SFS 6000 -standardin taulukoihin (kupari, PVC-eristys,
+        70 °C). Tarkista aina lopullinen mitoitus standardikirjasta. Työkalu ei
+        korvaa sähkösuunnittelijan ammattitaitoa.
       </p>
     </div>
   );

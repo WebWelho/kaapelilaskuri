@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   calculateCurrent,
   selectFuse,
+  selectMCB,
+  selectProtection,
+  getProtectionDescription,
   getTempCorrectionFactor,
   getGroupCorrectionFactor,
   selectCable,
@@ -162,5 +165,79 @@ describe("getCableDescription", () => {
 
   it("MK 3-vaihe → 4× MK 25 + PE 25", () => {
     expect(getCableDescription("MK", 25, "3-phase")).toBe("4× MK 25 + PE 25");
+  });
+});
+
+describe("selectMCB", () => {
+  it("valitsee B16 kun virta 14.43 A", () => {
+    expect(selectMCB(14.43)).toBe(16);
+  });
+
+  it("valitsee 10 A pienelle virralle", () => {
+    expect(selectMCB(8.7)).toBe(10);
+  });
+
+  it("valitsee 6 A pienimmälle virralle", () => {
+    expect(selectMCB(3)).toBe(6);
+  });
+
+  it("valitsee tasan MCB-koon", () => {
+    expect(selectMCB(16)).toBe(16);
+  });
+
+  it("valitsee 63 A suurimmalle MCB-virralle", () => {
+    expect(selectMCB(55)).toBe(63);
+  });
+
+  it("palauttaa null liian suurelle virralle (> 63 A)", () => {
+    expect(selectMCB(70)).toBeNull();
+  });
+
+  it("tukee 13 A MCB-kokoa", () => {
+    expect(selectMCB(11)).toBe(13);
+  });
+});
+
+describe("selectProtection", () => {
+  it("käyttää gG-taulukkoa kun tyyppi on gG", () => {
+    expect(selectProtection(28.87, "gG")).toBe(32);
+  });
+
+  it("käyttää MCB-taulukkoa kun tyyppi on MCB-B", () => {
+    expect(selectProtection(28.87, "MCB-B")).toBe(32);
+  });
+
+  it("käyttää MCB-taulukkoa kun tyyppi on MCB-C", () => {
+    expect(selectProtection(14, "MCB-C")).toBe(16);
+  });
+
+  it("MCB palauttaa null yli 63 A virralle", () => {
+    expect(selectProtection(70, "MCB-B")).toBeNull();
+  });
+
+  it("gG palauttaa arvon yli 63 A virralle", () => {
+    expect(selectProtection(70, "gG")).toBe(80);
+  });
+});
+
+describe("getProtectionDescription", () => {
+  it("gG-sulake", () => {
+    expect(getProtectionDescription("gG", 32)).toBe("32 A gG");
+  });
+
+  it("MCB-B", () => {
+    expect(getProtectionDescription("MCB-B", 16)).toBe("B16");
+  });
+
+  it("MCB-C", () => {
+    expect(getProtectionDescription("MCB-C", 32)).toBe("C32");
+  });
+
+  it("MCB-D", () => {
+    expect(getProtectionDescription("MCB-D", 63)).toBe("D63");
+  });
+
+  it("MCB-K", () => {
+    expect(getProtectionDescription("MCB-K", 40)).toBe("K40");
   });
 });

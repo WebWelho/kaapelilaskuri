@@ -1,10 +1,22 @@
-import type { CrossSection, InstallMethod } from "./types";
+import type { CrossSection, InstallMethod, ProtectionType } from "./types";
 
 /** Standardisulakekoot gG (A) */
 export const FUSE_SIZES = [
   6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
   630,
 ] as const;
+
+/** Johdonsuojakatkaisijan (MCB) standardikoot (A) */
+export const MCB_SIZES = [6, 10, 13, 16, 20, 25, 32, 40, 50, 63] as const;
+
+/** Suojalaitteen kuvaukset */
+export const PROTECTION_DESCRIPTIONS: Record<ProtectionType, string> = {
+  gG: "gG-sulake (kahvasulake)",
+  "MCB-B": "B-johdonsuojakatkaisija (yleiskäyttö)",
+  "MCB-C": "C-johdonsuojakatkaisija (moottorit)",
+  "MCB-D": "D-johdonsuojakatkaisija (muuntajat, hitsaus)",
+  "MCB-K": "K-johdonsuojakatkaisija (teollisuusmoottorit)",
+};
 
 /** Kaapelipoikkipinnat (mm²) */
 export const CROSS_SECTIONS: CrossSection[] = [
