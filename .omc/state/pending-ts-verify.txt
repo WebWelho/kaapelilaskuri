@@ -1,0 +1,3 @@
+/Users/webwelho/Documents/GitHub/kaapelilaskuri/src/proxy.ts
+/Users/webwelho/Documents/GitHub/kaapelilaskuri/src/app/api/preview-auth/route.ts
+/Users/webwelho/Documents/GitHub/kaapelilaskuri/src/app/preview-auth/page.tsx
