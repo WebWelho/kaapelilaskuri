@@ -152,6 +152,35 @@ export function ResultPanel({ result }: { result: CalcResult }) {
         </div>
       </div>
 
+      {/* Oikosulkuvirtatarkistus */}
+      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
+        <div className="flex items-center gap-2 pb-2">
+          <GlowDot color={result.faultCurrentOk ? "green" : "red"} />
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+            Oikosulkuvirtatarkistus
+          </span>
+        </div>
+        <div className="divide-y divide-[var(--border-subtle)]">
+          <DetailRow
+            label="Oikosulkuvirta (Ik min)"
+            value={`${result.faultCurrentA.toFixed(0)} A`}
+            status={result.faultCurrentOk ? "ok" : "error"}
+          />
+          <DetailRow
+            label="Vaadittu laukaisu"
+            value={`${result.requiredFaultCurrentA} A`}
+          />
+          <DetailRow
+            label="Silmukkaimpedanssi (Zs)"
+            value={`${result.totalLoopImpedanceOhm.toFixed(3)} \u03A9`}
+          />
+          <DetailRow
+            label="Kaapelin impedanssi"
+            value={`${result.cableLoopImpedanceOhm.toFixed(3)} \u03A9`}
+          />
+        </div>
+      </div>
+
       {/* Varoitukset */}
       {result.warnings.length > 0 && (
         <div className="rounded-2xl border border-[var(--text-warn)]/20 bg-[var(--text-warn)]/5 p-4">

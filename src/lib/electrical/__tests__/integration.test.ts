@@ -223,4 +223,101 @@ describe("calculate — integraatiotesti", () => {
     expect(result.protectionType).toBe("gG");
     expect(result.protectionDescription).toBe("32 A gG");
   });
+
+  it("oikosulkuvirta: pistorasiapiiri B16, 15 m — riittää", () => {
+    const input: CalcInput = {
+      powerW: 3680,
+      phase: "1-phase",
+      cosPhi: 1.0,
+      installMethod: "C",
+      cableLengthM: 15,
+      ambientTempC: 30,
+      groupedCircuits: 1,
+      loadType: "general",
+      protectionType: "MCB-B",
+      sourceImpedanceOhm: 0.5,
+    };
+
+    const result = calculate(input);
+
+    // B16 vaatii 5 × 16 = 80A
+    expect(result.requiredFaultCurrentA).toBe(80);
+    // Zcable = 2 × 0.0225 × 15 / 2.5 = 0.27Ω
+    // Zs = 0.5 + 0.27 = 0.77Ω
+    // Ik = 0.95 × 230 / 0.77 = 283.8A → riittää
+    expect(result.faultCurrentA).toBeGreaterThan(80);
+    expect(result.faultCurrentOk).toBe(true);
+  });
+
+  it("oikosulkuvirta: pitkä kaapeli C32, 60 m — ei riitä", () => {
+    const input: CalcInput = {
+      powerW: 20000,
+      phase: "3-phase",
+      cosPhi: 1.0,
+      installMethod: "C",
+      cableLengthM: 60,
+      ambientTempC: 30,
+      groupedCircuits: 1,
+      loadType: "general",
+      protectionType: "MCB-C",
+      sourceImpedanceOhm: 0.8,
+    };
+
+    const result = calculate(input);
+
+    // C32 vaatii 10 × 32 = 320A
+    expect(result.requiredFaultCurrentA).toBe(320);
+    // Zcable = 2 × 0.0225 × 60 / 6 = 0.45Ω
+    // Zs = 0.8 + 0.45 = 1.25Ω
+    // Ik = 0.95 × 230 / 1.25 = 174.8A → ei riitä
+    expect(result.faultCurrentA).toBeLessThan(320);
+    expect(result.faultCurrentOk).toBe(false);
+    expect(result.warnings.some((w) => w.includes("Oikosulkuvirta"))).toBe(
+      true,
+    );
+  });
+
+  it("oikosulkuvirta: oletusimpedanssi 0.5Ω kun ei annettu", () => {
+    const input: CalcInput = {
+      powerW: 3680,
+      phase: "1-phase",
+      cosPhi: 1.0,
+      installMethod: "C",
+      cableLengthM: 15,
+      ambientTempC: 30,
+      groupedCircuits: 1,
+      loadType: "general",
+      protectionType: "MCB-B",
+    };
+
+    const result = calculate(input);
+
+    // Sama tulos kuin eksplisiittisesti annettu 0.5Ω
+    expect(result.totalLoopImpedanceOhm).toBeGreaterThan(0.5);
+    expect(result.faultCurrentA).toBeGreaterThan(0);
+    expect(result.cableLoopImpedanceOhm).toBeGreaterThan(0);
+  });
+
+  it("oikosulkuvirta: gG-sulake 32A, normaali piiri — riittää", () => {
+    const input: CalcInput = {
+      powerW: 20000,
+      phase: "3-phase",
+      cosPhi: 1.0,
+      installMethod: "C",
+      cableLengthM: 30,
+      ambientTempC: 30,
+      groupedCircuits: 1,
+      loadType: "general",
+      sourceImpedanceOhm: 0.3,
+    };
+
+    const result = calculate(input);
+
+    // gG 32A vaatii 150A 0.4s:ssä
+    expect(result.requiredFaultCurrentA).toBe(150);
+    // Zcable = 2 × 0.0225 × 30 / 6 = 0.225Ω
+    // Zs = 0.3 + 0.225 = 0.525Ω
+    // Ik = 0.95 × 230 / 0.525 = 416.2A → riittää
+    expect(result.faultCurrentOk).toBe(true);
+  });
 });

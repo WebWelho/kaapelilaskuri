@@ -15,10 +15,18 @@ import {
   getCableDescription,
 } from "./calculator";
 import { calculateVoltageDrop, checkVoltageDrop } from "./voltage-drop";
+import {
+  calculateCableLoopImpedance,
+  calculateFaultCurrent,
+  checkDisconnection,
+} from "./short-circuit";
 import { CROSS_SECTIONS, GROUND_INSTALL_METHODS } from "./constants";
 
 export type { CalcInput, CalcResult };
 export { CROSS_SECTIONS };
+
+/** Oletusarvo verkon silmukkaimpedanssille (Ω) */
+const DEFAULT_SOURCE_IMPEDANCE = 0.5;
 
 /** Suorita koko mitoituslaskenta */
 export function calculate(input: CalcInput): CalcResult {
@@ -106,6 +114,22 @@ export function calculate(input: CalcInput): CalcResult {
     input.phase,
   );
 
+  // 7. Oikosulkuvirtatarkistus
+  const sourceZ = input.sourceImpedanceOhm ?? DEFAULT_SOURCE_IMPEDANCE;
+  const cableLoopZ = calculateCableLoopImpedance(
+    crossSection as number,
+    input.cableLengthM,
+    input.phase,
+  );
+  const faultCurrentA = calculateFaultCurrent(sourceZ, cableLoopZ);
+  const scCheck = checkDisconnection(faultCurrentA, protectionType, fuseA);
+
+  if (!scCheck.disconnectionOk) {
+    warnings.push(
+      `Oikosulkuvirta ${faultCurrentA.toFixed(0)} A ei riitä suojalaitteen ${getProtectionDescription(protectionType, fuseA)} poiskytkentään (vaaditaan ${scCheck.requiredFaultCurrentA} A)`,
+    );
+  }
+
   return {
     currentA,
     fuseA,
@@ -122,5 +146,10 @@ export function calculate(input: CalcInput): CalcResult {
     tempCorrectionFactor: tempFactor,
     groupCorrectionFactor: groupFactor,
     warnings,
+    faultCurrentA,
+    requiredFaultCurrentA: scCheck.requiredFaultCurrentA,
+    faultCurrentOk: scCheck.disconnectionOk,
+    cableLoopImpedanceOhm: cableLoopZ,
+    totalLoopImpedanceOhm: sourceZ + cableLoopZ,
   };
 }

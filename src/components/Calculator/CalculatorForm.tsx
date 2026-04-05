@@ -272,7 +272,7 @@ export function CalculatorForm() {
               })}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <InputField label="Pituus (m)">
                 <input
                   type="number"
@@ -316,6 +316,23 @@ export function CalculatorForm() {
                     const v = parseInt(e.target.value, 10);
                     update({ groupedCircuits: isNaN(v) ? 1 : v });
                     setActivePreset(null);
+                  }}
+                  className="input-field font-mono"
+                />
+              </InputField>
+              <InputField label="Ze (Ω)">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min="0.01"
+                  max="5"
+                  step="0.05"
+                  value={input.sourceImpedanceOhm ?? 0.5}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value);
+                    update({
+                      sourceImpedanceOhm: isNaN(v) ? 0.5 : v,
+                    });
                   }}
                   className="input-field font-mono"
                 />

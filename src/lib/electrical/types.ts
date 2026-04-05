@@ -61,6 +61,8 @@ export interface CalcInput {
   loadType: LoadType;
   /** Suojalaitetyyppi (oletus: gG) */
   protectionType?: ProtectionType;
+  /** Verkon silmukkaimpedanssi syöttöpisteessä (Ω). Oletus: 0.5 Ω */
+  sourceImpedanceOhm?: number;
 }
 
 /** Laskurin tulos */
@@ -95,4 +97,28 @@ export interface CalcResult {
   groupCorrectionFactor: number;
   /** Varoitukset */
   warnings: string[];
+  /** Oikosulkuvirta piirin päässä (A) */
+  faultCurrentA: number;
+  /** Vaadittu minimioikosulkuvirta suojalaitteen laukaisuun (A) */
+  requiredFaultCurrentA: number;
+  /** Oikosulkuvirtatarkistus ok */
+  faultCurrentOk: boolean;
+  /** Kaapelin silmukkaimpedanssi (Ω) */
+  cableLoopImpedanceOhm: number;
+  /** Kokonaissilmukkaimpedanssi (Ω) */
+  totalLoopImpedanceOhm: number;
+}
+
+/** Oikosulkuvirtalaskennan tulos */
+export interface ShortCircuitResult {
+  /** Minimioikosulkuvirta piirin päässä (A) */
+  faultCurrentA: number;
+  /** Kaapelin silmukkaimpedanssi (Ω) */
+  cableLoopImpedanceOhm: number;
+  /** Kokonaissilmukkaimpedanssi (Ω) */
+  totalLoopImpedanceOhm: number;
+  /** Vaadittu minimioikosulkuvirta (A) */
+  requiredFaultCurrentA: number;
+  /** Suojalaitteen poiskytkentä riittävä */
+  disconnectionOk: boolean;
 }
