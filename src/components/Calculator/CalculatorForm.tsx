@@ -7,6 +7,8 @@ import type {
   Phase,
   LoadType,
   ProtectionType,
+  ConductorMaterial,
+  InsulationType,
 } from "@/lib/electrical/types";
 import { calculate } from "@/lib/electrical";
 import { PRESETS, type Preset } from "@/lib/electrical/presets";
@@ -241,8 +243,57 @@ export function CalculatorForm() {
             </div>
           </Card>
 
-          {/* 3. Asennus */}
-          <Card number={3} title="Asennustapa">
+          {/* 3. Kaapeli */}
+          <Card number={3} title="Kaapeli">
+            <div className="mb-4 grid grid-cols-2 gap-3">
+              {/* Materiaali */}
+              <InputField label="Johdinmateriaali">
+                <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
+                  {(["copper", "aluminium"] as ConductorMaterial[]).map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => {
+                        update({ conductorMaterial: m });
+                        setActivePreset(null);
+                      }}
+                      className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                        (input.conductorMaterial ?? "copper") === m
+                          ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
+                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                      }`}
+                    >
+                      {m === "copper" ? "Cu" : "Al"}
+                    </button>
+                  ))}
+                </div>
+              </InputField>
+
+              {/* Eristys */}
+              <InputField label="Eristys">
+                <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
+                  {(["PVC", "XLPE"] as InsulationType[]).map((ins) => (
+                    <button
+                      key={ins}
+                      onClick={() => {
+                        update({ insulationType: ins });
+                        setActivePreset(null);
+                      }}
+                      className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                        (input.insulationType ?? "PVC") === ins
+                          ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
+                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                      }`}
+                    >
+                      {ins}
+                    </button>
+                  ))}
+                </div>
+              </InputField>
+            </div>
+          </Card>
+
+          {/* 4. Asennus */}
+          <Card number={4} title="Asennustapa">
             <div className="mb-4 grid grid-cols-5 gap-2">
               {INSTALL_METHODS.map(({ key, label, desc }) => {
                 const active = input.installMethod === key;

@@ -1,7 +1,9 @@
 import type {
   CalcInput,
   CalcResult,
+  ConductorMaterial,
   CrossSection,
+  InsulationType,
   ProtectionType,
 } from "./types";
 import {
@@ -20,7 +22,11 @@ import {
   calculateFaultCurrent,
   checkDisconnection,
 } from "./short-circuit";
-import { CROSS_SECTIONS, GROUND_INSTALL_METHODS } from "./constants";
+import {
+  CROSS_SECTIONS,
+  AL_CROSS_SECTIONS,
+  GROUND_INSTALL_METHODS,
+} from "./constants";
 
 export type { CalcInput, CalcResult };
 export { CROSS_SECTIONS };
@@ -32,6 +38,9 @@ const DEFAULT_SOURCE_IMPEDANCE = 0.5;
 export function calculate(input: CalcInput): CalcResult {
   const warnings: string[] = [];
   const protectionType: ProtectionType = input.protectionType ?? "gG";
+  const conductorMaterial: ConductorMaterial =
+    input.conductorMaterial ?? "copper";
+  const insulationType: InsulationType = input.insulationType ?? "PVC";
 
   // 1. Kuormitusvirta
   const currentA = calculateCurrent(input.powerW, input.phase, input.cosPhi);
@@ -47,7 +56,11 @@ export function calculate(input: CalcInput): CalcResult {
 
   // 3. Korjauskertoimet
   const isGround = GROUND_INSTALL_METHODS.includes(input.installMethod);
-  const tempFactor = getTempCorrectionFactor(input.ambientTempC, isGround);
+  const tempFactor = getTempCorrectionFactor(
+    input.ambientTempC,
+    isGround,
+    insulationType,
+  );
   const groupFactor = getGroupCorrectionFactor(input.groupedCircuits);
 
   // 4. Kaapelinvalinta
@@ -57,6 +70,7 @@ export function calculate(input: CalcInput): CalcResult {
     input.phase,
     tempFactor,
     groupFactor,
+    conductorMaterial,
   );
 
   let crossSection = cableResult.crossSection;
@@ -67,26 +81,30 @@ export function calculate(input: CalcInput): CalcResult {
   }
 
   // 5. Jännitteenalenema — tarkista ja kasvata tarvittaessa
+  const csArray =
+    conductorMaterial === "aluminium" ? AL_CROSS_SECTIONS : CROSS_SECTIONS;
+
   let vdResult = calculateVoltageDrop(
     currentA,
     crossSection,
     input.cableLengthM,
     input.phase,
+    conductorMaterial,
   );
   const vdCheck = checkVoltageDrop(vdResult.voltageDropPercent, input.loadType);
 
   if (!vdCheck.ok) {
-    // Kokeile suurempia poikkipintoja
-    const csIndex = CROSS_SECTIONS.indexOf(crossSection);
+    const csIndex = csArray.indexOf(crossSection);
     let upgraded = false;
 
-    for (let i = csIndex + 1; i < CROSS_SECTIONS.length; i++) {
-      const tryCs = CROSS_SECTIONS[i];
+    for (let i = csIndex + 1; i < csArray.length; i++) {
+      const tryCs = csArray[i];
       const tryVd = calculateVoltageDrop(
         currentA,
         tryCs,
         input.cableLengthM,
         input.phase,
+        conductorMaterial,
       );
       if (tryVd.voltageDropPercent <= vdCheck.limit) {
         warnings.push(
@@ -107,7 +125,10 @@ export function calculate(input: CalcInput): CalcResult {
   }
 
   // 6. Kaapelityyppi ja nimike
-  const cableType = getCableRecommendation(input.installMethod);
+  const cableType = getCableRecommendation(
+    input.installMethod,
+    conductorMaterial,
+  );
   const cableDescription = getCableDescription(
     cableType,
     crossSection as CrossSection,
@@ -120,6 +141,7 @@ export function calculate(input: CalcInput): CalcResult {
     crossSection as number,
     input.cableLengthM,
     input.phase,
+    conductorMaterial,
   );
   const faultCurrentA = calculateFaultCurrent(sourceZ, cableLoopZ);
   const scCheck = checkDisconnection(faultCurrentA, protectionType, fuseA);
@@ -145,6 +167,8 @@ export function calculate(input: CalcInput): CalcResult {
     actualCapacityA: actualCapacity,
     tempCorrectionFactor: tempFactor,
     groupCorrectionFactor: groupFactor,
+    conductorMaterial,
+    insulationType,
     warnings,
     faultCurrentA,
     requiredFaultCurrentA: scCheck.requiredFaultCurrentA,

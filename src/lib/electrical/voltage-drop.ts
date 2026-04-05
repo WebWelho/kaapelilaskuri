@@ -1,5 +1,5 @@
-import type { CrossSection, Phase, LoadType } from "./types";
-import { COPPER_RESISTIVITY_70C } from "./constants";
+import type { CrossSection, Phase, LoadType, ConductorMaterial } from "./types";
+import { COPPER_RESISTIVITY_70C, ALUMINIUM_RESISTIVITY_70C } from "./constants";
 
 interface VoltageDropResult {
   voltageDropV: number;
@@ -12,6 +12,7 @@ export function calculateVoltageDrop(
   crossSectionMm2: CrossSection | number,
   lengthM: number,
   phase: Phase,
+  conductorMaterial: ConductorMaterial = "copper",
 ): VoltageDropResult {
   if (lengthM === 0) {
     return { voltageDropV: 0, voltageDropPercent: 0 };
@@ -19,10 +20,13 @@ export function calculateVoltageDrop(
 
   const voltage = phase === "1-phase" ? 230 : 400;
   const multiplier = phase === "1-phase" ? 2 : Math.sqrt(3);
+  const resistivity =
+    conductorMaterial === "aluminium"
+      ? ALUMINIUM_RESISTIVITY_70C
+      : COPPER_RESISTIVITY_70C;
 
   const voltageDropV =
-    (multiplier * lengthM * currentA * COPPER_RESISTIVITY_70C) /
-    crossSectionMm2;
+    (multiplier * lengthM * currentA * resistivity) / crossSectionMm2;
 
   const voltageDropPercent = (voltageDropV / voltage) * 100;
 

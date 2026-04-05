@@ -3,16 +3,23 @@ import type {
   InstallMethod,
   Phase,
   CableType,
+  ConductorMaterial,
+  InsulationType,
   ProtectionType,
 } from "./types";
 import {
   FUSE_SIZES,
   MCB_SIZES,
   CROSS_SECTIONS,
+  AL_CROSS_SECTIONS,
   CAPACITY_2_CONDUCTORS,
   CAPACITY_3_CONDUCTORS,
+  AL_CAPACITY_2_CONDUCTORS,
+  AL_CAPACITY_3_CONDUCTORS,
   TEMP_CORRECTION_AIR,
   TEMP_CORRECTION_GROUND,
+  XLPE_TEMP_CORRECTION_AIR,
+  XLPE_TEMP_CORRECTION_GROUND,
   GROUPING_FACTORS,
   GROUND_INSTALL_METHODS,
 } from "./constants";
@@ -100,7 +107,14 @@ function interpolateFactor(
 export function getTempCorrectionFactor(
   tempC: number,
   isGroundInstall: boolean,
+  insulationType: InsulationType = "PVC",
 ): number {
+  if (insulationType === "XLPE") {
+    const table = isGroundInstall
+      ? XLPE_TEMP_CORRECTION_GROUND
+      : XLPE_TEMP_CORRECTION_AIR;
+    return interpolateFactor(table, tempC);
+  }
   const table = isGroundInstall ? TEMP_CORRECTION_GROUND : TEMP_CORRECTION_AIR;
   return interpolateFactor(table, tempC);
 }
@@ -118,8 +132,22 @@ export function selectCable(
   phase: Phase,
   tempFactor: number,
   groupFactor: number,
+  conductorMaterial: ConductorMaterial = "copper",
 ): { crossSection: CrossSection | null; capacityA: number } {
   const requiredCapacity = fuseA / (tempFactor * groupFactor);
+
+  if (conductorMaterial === "aluminium") {
+    const table =
+      phase === "1-phase" ? AL_CAPACITY_2_CONDUCTORS : AL_CAPACITY_3_CONDUCTORS;
+
+    for (const cs of AL_CROSS_SECTIONS) {
+      const capacity = table[installMethod][cs];
+      if (capacity !== undefined && capacity >= requiredCapacity) {
+        return { crossSection: cs, capacityA: capacity };
+      }
+    }
+    return { crossSection: null, capacityA: 0 };
+  }
 
   const table =
     phase === "1-phase" ? CAPACITY_2_CONDUCTORS : CAPACITY_3_CONDUCTORS;
@@ -134,14 +162,20 @@ export function selectCable(
   return { crossSection: null, capacityA: 0 };
 }
 
-/** Suosittele kaapelityyppi asennustavan perusteella */
+/** Suosittele kaapelityyppi asennustavan ja materiaalin perusteella */
 export function getCableRecommendation(
   installMethod: InstallMethod,
+  conductorMaterial: ConductorMaterial = "copper",
 ): CableType {
+  if (conductorMaterial === "aluminium") {
+    if (GROUND_INSTALL_METHODS.includes(installMethod)) {
+      return "AMCMK";
+    }
+    return "AXMK";
+  }
   if (GROUND_INSTALL_METHODS.includes(installMethod)) {
     return "MCMK";
   }
-  // F ja G = yksijohdinkaapelit kaapelihyllyllä
   if (installMethod === "F" || installMethod === "G") {
     return "MK";
   }
@@ -155,16 +189,22 @@ export function getCableDescription(
   phase: Phase,
 ): string {
   if (cableType === "MK") {
-    // Yksijohdinkaapelit: erillisiä johtimia
     const count = phase === "3-phase" ? 4 : 2;
-    return `${count}× MK ${crossSection} + PE ${crossSection}`;
+    return `${count}\u00D7 MK ${crossSection} + PE ${crossSection}`;
   }
   if (cableType === "MCMK") {
-    // Armoitu maakaapeli: kuormajohtimet + konsentinen PE
     const loadConductors = phase === "3-phase" ? 4 : 3;
-    return `MCMK ${loadConductors}×${crossSection}+${crossSection}`;
+    return `MCMK ${loadConductors}\u00D7${crossSection}+${crossSection}`;
   }
-  // MMJ: monijohtiminen muovivaippakaapeli, S = kaikki johtimet samaa kokoa
+  if (cableType === "AMCMK") {
+    const loadConductors = phase === "3-phase" ? 4 : 3;
+    return `AMCMK ${loadConductors}\u00D7${crossSection}+${crossSection}`;
+  }
+  if (cableType === "AXMK") {
+    const totalConductors = phase === "3-phase" ? 4 : 2;
+    return `AXMK ${totalConductors}\u00D7${crossSection}`;
+  }
+  // MMJ
   const totalConductors = phase === "3-phase" ? 5 : 3;
-  return `MMJ ${totalConductors}×${crossSection}S`;
+  return `MMJ ${totalConductors}\u00D7${crossSection}S`;
 }

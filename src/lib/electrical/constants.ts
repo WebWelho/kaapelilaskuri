@@ -1,4 +1,10 @@
-import type { CrossSection, InstallMethod, ProtectionType } from "./types";
+import type {
+  CrossSection,
+  InstallMethod,
+  ProtectionType,
+  ConductorMaterial,
+  InsulationType,
+} from "./types";
 
 /** Standardisulakekoot gG (A) */
 export const FUSE_SIZES = [
@@ -439,6 +445,324 @@ export const GROUPING_FACTORS: Record<number, number> = {
 
 /** Kuparin resistiivisyys käyttölämpötilassa 70°C (Ω·mm²/m) */
 export const COPPER_RESISTIVITY_70C = 0.0225;
+
+/** Alumiinin resistiivisyys käyttölämpötilassa 70°C (Ω·mm²/m) */
+export const ALUMINIUM_RESISTIVITY_70C = 0.036;
+
+/** Resistiivisyydet materiaaleittain ja eristystyypeittäin */
+export const RESISTIVITY: Record<
+  ConductorMaterial,
+  Record<InsulationType, number>
+> = {
+  copper: { PVC: 0.0225, XLPE: 0.0225 }, // Sama 70°C-arvo, XLPE sallii isomman kuormitettavuuden
+  aluminium: { PVC: 0.036, XLPE: 0.036 },
+};
+
+/**
+ * SFS 6000 — Alumiini, PVC-eristys
+ * Kuormitettavuus (A) — 3 kuormitettua johdinta
+ * Alumiinikaapelit alkavat 16 mm²:stä
+ */
+export const AL_CAPACITY_3_CONDUCTORS: Record<
+  InstallMethod,
+  Partial<Record<CrossSection, number>>
+> = {
+  A1: {
+    16: 36,
+    25: 47,
+    35: 57,
+    50: 68,
+    70: 86,
+    95: 103,
+    120: 119,
+    150: 135,
+    185: 153,
+    240: 179,
+  },
+  A2: {
+    16: 36,
+    25: 47,
+    35: 57,
+    50: 68,
+    70: 86,
+    95: 103,
+    120: 119,
+    150: 135,
+    185: 153,
+    240: 179,
+  },
+  B1: {
+    16: 43,
+    25: 55,
+    35: 68,
+    50: 81,
+    70: 102,
+    95: 124,
+    120: 142,
+    150: 163,
+    185: 184,
+    240: 216,
+  },
+  B2: {
+    16: 43,
+    25: 55,
+    35: 66,
+    50: 78,
+    70: 98,
+    95: 119,
+    120: 137,
+    150: 157,
+    185: 178,
+    240: 209,
+  },
+  C: {
+    16: 47,
+    25: 61,
+    35: 75,
+    50: 91,
+    70: 115,
+    95: 138,
+    120: 159,
+    150: 177,
+    185: 202,
+    240: 236,
+  },
+  D1: {
+    16: 46,
+    25: 59,
+    35: 71,
+    50: 84,
+    70: 104,
+    95: 123,
+    120: 140,
+    150: 158,
+    185: 178,
+    240: 204,
+  },
+  D2: {
+    16: 43,
+    25: 55,
+    35: 66,
+    50: 78,
+    70: 96,
+    95: 114,
+    120: 130,
+    150: 147,
+    185: 165,
+    240: 190,
+  },
+  E: {
+    16: 42,
+    25: 55,
+    35: 68,
+    50: 81,
+    70: 102,
+    95: 124,
+    120: 142,
+    150: 163,
+    185: 184,
+    240: 216,
+  },
+  F: {
+    16: 53,
+    25: 67,
+    35: 83,
+    50: 101,
+    70: 127,
+    95: 153,
+    120: 178,
+    150: 202,
+    185: 233,
+    240: 277,
+  },
+  G: {
+    16: 55,
+    25: 69,
+    35: 87,
+    50: 105,
+    70: 133,
+    95: 159,
+    120: 185,
+    150: 210,
+    185: 241,
+    240: 283,
+  },
+};
+
+/**
+ * SFS 6000 — Alumiini, PVC-eristys
+ * Kuormitettavuus (A) — 2 kuormitettua johdinta
+ */
+export const AL_CAPACITY_2_CONDUCTORS: Record<
+  InstallMethod,
+  Partial<Record<CrossSection, number>>
+> = {
+  A1: {
+    16: 41,
+    25: 53,
+    35: 65,
+    50: 78,
+    70: 98,
+    95: 118,
+    120: 136,
+    150: 156,
+    185: 176,
+    240: 207,
+  },
+  A2: {
+    16: 39,
+    25: 50,
+    35: 61,
+    50: 74,
+    70: 94,
+    95: 113,
+    120: 130,
+    150: 149,
+    185: 169,
+    240: 197,
+  },
+  B1: {
+    16: 50,
+    25: 65,
+    35: 79,
+    50: 95,
+    70: 121,
+    95: 145,
+    120: 167,
+    150: 192,
+    185: 218,
+    240: 255,
+  },
+  B2: {
+    16: 47,
+    25: 61,
+    35: 75,
+    50: 90,
+    70: 113,
+    95: 136,
+    120: 157,
+    150: 179,
+    185: 204,
+    240: 240,
+  },
+  C: {
+    16: 56,
+    25: 72,
+    35: 86,
+    50: 104,
+    70: 132,
+    95: 160,
+    120: 185,
+    150: 207,
+    185: 235,
+    240: 275,
+  },
+  D1: {
+    16: 54,
+    25: 70,
+    35: 84,
+    50: 99,
+    70: 123,
+    95: 145,
+    120: 165,
+    150: 182,
+    185: 204,
+    240: 235,
+  },
+  D2: {
+    16: 46,
+    25: 59,
+    35: 71,
+    50: 84,
+    70: 104,
+    95: 123,
+    120: 140,
+    150: 158,
+    185: 178,
+    240: 204,
+  },
+  E: {
+    16: 56,
+    25: 72,
+    35: 86,
+    50: 104,
+    70: 132,
+    95: 160,
+    120: 185,
+    150: 207,
+    185: 235,
+    240: 275,
+  },
+  F: {
+    16: 65,
+    25: 82,
+    35: 102,
+    50: 124,
+    70: 160,
+    95: 194,
+    120: 226,
+    150: 261,
+    185: 299,
+    240: 354,
+  },
+  G: {
+    16: 70,
+    25: 90,
+    35: 112,
+    50: 135,
+    70: 173,
+    95: 209,
+    120: 243,
+    150: 280,
+    185: 320,
+    240: 376,
+  },
+};
+
+/**
+ * Lämpötilakorjauskerroin — XLPE-eristys, ilma-asennus
+ * Referenssilämpötila 30°C, suurin käyttölämpötila 90°C
+ */
+export const XLPE_TEMP_CORRECTION_AIR: Record<number, number> = {
+  10: 1.15,
+  15: 1.12,
+  20: 1.08,
+  25: 1.04,
+  30: 1.0,
+  35: 0.96,
+  40: 0.91,
+  45: 0.87,
+  50: 0.82,
+  55: 0.76,
+  60: 0.71,
+  65: 0.65,
+  70: 0.58,
+  75: 0.5,
+  80: 0.41,
+};
+
+/**
+ * Lämpötilakorjauskerroin — XLPE-eristys, maa-asennus
+ * Referenssilämpötila 20°C
+ */
+export const XLPE_TEMP_CORRECTION_GROUND: Record<number, number> = {
+  10: 1.07,
+  15: 1.04,
+  20: 1.0,
+  25: 0.96,
+  30: 0.93,
+  35: 0.89,
+  40: 0.85,
+  45: 0.8,
+  50: 0.76,
+  55: 0.71,
+  60: 0.65,
+};
+
+/** Alumiinin poikkipinnat (mm²) — alkaa 16 mm²:stä */
+export const AL_CROSS_SECTIONS: CrossSection[] = [
+  16, 25, 35, 50, 70, 95, 120, 150, 185, 240,
+];
 
 /** Maa-asennustavat */
 export const GROUND_INSTALL_METHODS: InstallMethod[] = ["D1", "D2"];

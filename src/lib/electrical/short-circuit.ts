@@ -1,5 +1,5 @@
-import type { ProtectionType } from "./types";
-import { COPPER_RESISTIVITY_70C } from "./constants";
+import type { ProtectionType, ConductorMaterial } from "./types";
+import { COPPER_RESISTIVITY_70C, ALUMINIUM_RESISTIVITY_70C } from "./constants";
 
 /** Jännitekerroin minimioikosulkuvirralle (SFS 6000, IEC 60909-0) */
 const C_MIN = 0.95;
@@ -54,9 +54,14 @@ export function calculateCableLoopImpedance(
   crossSectionMm2: number,
   lengthM: number,
   _phase: "1-phase" | "3-phase",
+  conductorMaterial: ConductorMaterial = "copper",
 ): number {
   if (lengthM === 0) return 0;
-  return (2 * COPPER_RESISTIVITY_70C * lengthM) / crossSectionMm2;
+  const resistivity =
+    conductorMaterial === "aluminium"
+      ? ALUMINIUM_RESISTIVITY_70C
+      : COPPER_RESISTIVITY_70C;
+  return (2 * resistivity * lengthM) / crossSectionMm2;
 }
 
 /**

@@ -112,6 +112,10 @@ export function ResultPanel({
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2.5 py-1 text-xs text-[var(--text-muted)]">
             {result.cableType} · {result.actualCapacityA} A
           </span>
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2.5 py-1 text-xs text-[var(--text-muted)]">
+            {result.conductorMaterial === "aluminium" ? "Al" : "Cu"} ·{" "}
+            {result.insulationType}
+          </span>
         </div>
       </div>
 

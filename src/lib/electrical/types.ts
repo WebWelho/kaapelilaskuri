@@ -35,6 +35,12 @@ export type CrossSection =
 /** Kaapelityypit */
 export type CableType = "MMJ" | "MCMK" | "AXMK" | "AMCMK" | "MK";
 
+/** Johdinmateriaali */
+export type ConductorMaterial = "copper" | "aluminium";
+
+/** Eristystyyppi */
+export type InsulationType = "PVC" | "XLPE";
+
 /** Kuormatyyppi (vaikuttaa jännitteenalenemarajaan) */
 export type LoadType = "general" | "lighting";
 
@@ -61,6 +67,10 @@ export interface CalcInput {
   loadType: LoadType;
   /** Suojalaitetyyppi (oletus: gG) */
   protectionType?: ProtectionType;
+  /** Johdinmateriaali (oletus: copper) */
+  conductorMaterial?: ConductorMaterial;
+  /** Eristystyyppi (oletus: PVC) */
+  insulationType?: InsulationType;
   /** Verkon silmukkaimpedanssi syöttöpisteessä (Ω). Oletus: 0.5 Ω */
   sourceImpedanceOhm?: number;
 }
@@ -95,6 +105,10 @@ export interface CalcResult {
   tempCorrectionFactor: number;
   /** Ryhmityskerroin */
   groupCorrectionFactor: number;
+  /** Johdinmateriaali */
+  conductorMaterial: ConductorMaterial;
+  /** Eristystyyppi */
+  insulationType: InsulationType;
   /** Varoitukset */
   warnings: string[];
   /** Oikosulkuvirta piirin päässä (A) */
