@@ -351,7 +351,7 @@ export function CalculatorForm() {
               </p>
             </div>
           )}
-          {result.data && <ResultPanel result={result.data} />}
+          {result.data && <ResultPanel input={input} result={result.data} />}
           {!result.data && !result.error && (
             <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-[var(--border-medium)]">
               <p className="text-center text-sm text-[var(--text-muted)]">

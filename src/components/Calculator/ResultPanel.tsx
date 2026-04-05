@@ -1,6 +1,7 @@
 "use client";
 
-import type { CalcResult } from "@/lib/electrical";
+import type { CalcInput, CalcResult } from "@/lib/electrical";
+import { generateReport } from "@/lib/pdf/generate-report";
 
 function GlowDot({ color }: { color: "cyan" | "green" | "amber" | "red" }) {
   const styles = {
@@ -78,7 +79,13 @@ function DetailRow({
   );
 }
 
-export function ResultPanel({ result }: { result: CalcResult }) {
+export function ResultPanel({
+  input,
+  result,
+}: {
+  input: CalcInput;
+  result: CalcResult;
+}) {
   const vdStatus: "ok" | "warn" | "error" = !result.voltageDropOk
     ? "error"
     : result.voltageDropPercent > result.voltageDropLimit * 0.8
@@ -198,6 +205,14 @@ export function ResultPanel({ result }: { result: CalcResult }) {
           </ul>
         </div>
       )}
+
+      {/* PDF-tuloste */}
+      <button
+        onClick={() => generateReport(input, result)}
+        className="w-full rounded-xl border border-[var(--border-accent)] bg-[var(--bg-card)] px-4 py-3 text-sm font-medium text-[var(--text-accent)] transition-all hover:bg-[var(--bg-card-hover)] hover:shadow-[0_0_16px_var(--accent-glow)]"
+      >
+        Lataa PDF-raportti
+      </button>
 
       {/* SFS viittaus */}
       <p className="text-[10px] leading-relaxed text-[var(--text-muted)]">
