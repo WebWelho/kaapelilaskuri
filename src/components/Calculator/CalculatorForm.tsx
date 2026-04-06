@@ -13,6 +13,7 @@ import type {
 import { calculate } from "@/lib/electrical";
 import { PRESETS, type Preset } from "@/lib/electrical/presets";
 import { ResultPanel } from "./ResultPanel";
+import { ProjectBar } from "../Projects/ProjectBar";
 
 const DEFAULT_INPUT: CalcInput = {
   powerW: 20000,
@@ -69,6 +70,11 @@ export function CalculatorForm() {
       ...prev,
       ...preset.input,
     }));
+  }, []);
+
+  const handleLoadCircuit = useCallback((circuitInput: CalcInput) => {
+    setInput(circuitInput);
+    setActivePreset(null);
   }, []);
 
   const result = useMemo<{
@@ -392,8 +398,8 @@ export function CalculatorForm() {
           </Card>
         </div>
 
-        {/* Tulokset */}
-        <div className="lg:sticky lg:top-20 lg:self-start">
+        {/* Tulokset + projektit */}
+        <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           {result.error && (
             <div className="rounded-2xl border border-[var(--text-warn)]/30 bg-[var(--text-warn)]/5 p-5 text-sm">
               <div className="font-semibold text-[var(--text-warn)]">Virhe</div>
@@ -414,6 +420,13 @@ export function CalculatorForm() {
               </p>
             </div>
           )}
+
+          {/* Projektit */}
+          <ProjectBar
+            currentInput={input}
+            currentResult={result.data}
+            onLoadCircuit={handleLoadCircuit}
+          />
         </div>
       </div>
     </div>
