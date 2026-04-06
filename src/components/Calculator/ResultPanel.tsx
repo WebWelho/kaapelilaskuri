@@ -218,10 +218,11 @@ export function ResultPanel({
         Lataa PDF-raportti
       </button>
 
-      {/* SFS viittaus */}
+      {/* Vastuuvapauslauseke */}
       <p className="text-[10px] leading-relaxed text-[var(--text-muted)]">
-        SFS 6000 · kupari · PVC 70 °C · Tarkista aina lopullinen mitoitus
-        standardikirjasta.
+        Laskennallinen arvio — ei korvaa standardikirjaa tai pätevän
+        suunnittelijan arviota. Perustuu SFS 6000:2017 julkisiin periaatteisiin.
+        Vastuu lopullisesta mitoituksesta on aina sähköurakoitsijalla.
       </p>
     </div>
   );

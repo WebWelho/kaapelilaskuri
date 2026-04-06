@@ -11,10 +11,10 @@ export default function Home() {
           </div>
           <div>
             <h1 className="text-base font-bold tracking-tight text-[var(--text-primary)] sm:text-lg">
-              SähköAI — Kaapelimitoitus
+              Kaapelimitoitus
             </h1>
             <p className="text-[11px] text-[var(--text-muted)]">
-              Sulake &amp; kaapeli · SFS 6000
+              Sähköalan ammattilaisen apuväline · SFS 6000
             </p>
           </div>
           <div className="ml-auto">
@@ -29,8 +29,16 @@ export default function Home() {
         <CalculatorForm />
       </main>
 
-      <footer className="border-t border-[var(--border-subtle)] px-4 py-4 text-center text-[11px] text-[var(--text-muted)]">
-        TPCore Oy · SähköAI v0.2
+      <footer className="border-t border-[var(--border-subtle)] px-4 py-6 text-center text-[11px] leading-relaxed text-[var(--text-muted)]">
+        <p>TPCore · Kaapelimitoituslaskuri v0.2 (beta)</p>
+        <p className="mt-1">
+          Sähköalan ammattilaisten apuväline. Ei korvaa standardikirjaa tai
+          pätevän suunnittelijan arviota.
+        </p>
+        <p className="mt-1">
+          Laskenta perustuu SFS 6000:2017 julkisiin periaatteisiin. Tarkista
+          aina lopullinen mitoitus standardikirjasta.
+        </p>
       </footer>
     </div>
   );

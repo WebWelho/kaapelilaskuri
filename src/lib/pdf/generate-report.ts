@@ -36,7 +36,7 @@ export function generateReport(input: CalcInput, result: CalcResult): void {
 
   doc.setFontSize(9);
   doc.setTextColor(...COLORS.muted);
-  doc.text("SFS 6000 · SähköAI", margin, y);
+  doc.text("Laskennallinen arvio \u2014 ei virallinen dokumentti", margin, y);
 
   doc.text(formatDate(), pageWidth - margin, y, { align: "right" });
   y += 4;
@@ -175,11 +175,14 @@ export function generateReport(input: CalcInput, result: CalcResult): void {
   doc.setFontSize(7);
   doc.setTextColor(...COLORS.muted);
   doc.text(
-    "SFS 6000 · kupari · PVC 70 °C · Tarkista aina lopullinen mitoitus standardikirjasta.",
+    "Laskennallinen arvio \u2014 ei korvaa standardikirjaa tai p\u00E4tev\u00E4n suunnittelijan arviota. Perustuu SFS 6000:2017 julkisiin periaatteisiin.",
     margin,
     y,
+    { maxWidth: contentWidth * 0.7 },
   );
-  doc.text("SähköAI — sahkoai.fi", pageWidth - margin, y, { align: "right" });
+  doc.text("TPCore \u00B7 Kaapelimitoitus v0.2", pageWidth - margin, y, {
+    align: "right",
+  });
 
   // ── Tallenna ──
   const filename = `kaapelimitoitus_${result.crossSectionMm2}mm2_${result.fuseA}A_${new Date().toISOString().slice(0, 10)}.pdf`;
