@@ -2,14 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SähköAI — Kaapelimitoitus | SFS 6000",
+  title: "Sähkötyökalut — SFS 6000",
   description:
-    "Laske sulakekoko ja kaapelipoikkipinta SFS 6000 -standardin mukaan. Suomalainen ammattilaisten työkalu.",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Kaapelimitoitus",
-  },
+    "Kaapelimitoitus ja sähkösuunnittelu SFS 6000 -standardin mukaan. Sähköalan ammattilaisten apuväline.",
 };
 
 export const viewport: Viewport = {
@@ -31,17 +26,16 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              // Poista vanha Service Worker + tyhjennä cachet
+              // Tämä ajetaan KERRAN jokaisella käyttäjällä
               if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(function(reg) {
-                  reg.addEventListener('updatefound', function() {
-                    var newWorker = reg.installing;
-                    if (!newWorker) return;
-                    newWorker.addEventListener('statechange', function() {
-                      if (newWorker.state === 'activated') {
-                        window.location.reload();
-                      }
-                    });
-                  });
+                navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  regs.forEach(function(r) { r.unregister(); });
+                });
+              }
+              if ('caches' in window) {
+                caches.keys().then(function(names) {
+                  names.forEach(function(n) { caches.delete(n); });
                 });
               }
             `,
