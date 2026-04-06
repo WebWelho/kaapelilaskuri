@@ -1,4 +1,5 @@
 import { CalculatorForm } from "@/components/Calculator/CalculatorForm";
+import { CacheBuster } from "@/components/CacheBuster";
 
 export default function Home() {
   return (
@@ -30,7 +31,9 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-[var(--border-subtle)] px-4 py-6 text-center text-[11px] leading-relaxed text-[var(--text-muted)]">
-        <p>TPCore · Kaapelimitoituslaskuri v0.2 (beta)</p>
+        <p>
+          TPCore · Kaapelimitoituslaskuri <CacheBuster /> (beta)
+        </p>
         <p className="mt-1">
           Sähköalan ammattilaisten apuväline. Ei korvaa standardikirjaa tai
           pätevän suunnittelijan arviota.
