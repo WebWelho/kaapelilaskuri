@@ -7,7 +7,7 @@ const withSerwist = withSerwistInit({
   cacheOnNavigation: true,
   register: true,
   reloadOnOnline: true,
-  exclude: [/.map$/, /^manifest.*.js$/],
+  exclude: [/.map$/, /^manifest.*.js$/, /\/api\//],
 });
 
 const nextConfig: NextConfig = {
