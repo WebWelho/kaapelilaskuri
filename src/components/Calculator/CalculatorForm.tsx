@@ -154,118 +154,123 @@ export function CalculatorForm() {
         <div className="space-y-5">
           {/* 1. Kuorma */}
           <Card number={1} title="Kuorma">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* Teho / Virta */}
-              <div className="space-y-1.5">
-                <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
-                  {(["power", "current"] as InputMode[]).map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setInputMode(m)}
-                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                        inputMode === m
-                          ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
-                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                      }`}
-                    >
-                      {m === "power" ? "Teho (kW)" : "Virta (A)"}
-                    </button>
-                  ))}
-                </div>
-                {inputMode === "power" ? (
+            <div className="space-y-4">
+              {/* Teho/Virta toggle — täysleveä */}
+              <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
+                {(["power", "current"] as InputMode[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setInputMode(m)}
+                    className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                      inputMode === m
+                        ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                    }`}
+                  >
+                    {m === "power" ? "Teho (kW)" : "Virta (A)"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Arvo + Vaihe samalla rivillä */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <InputField
+                  label={inputMode === "power" ? "Teho (kW)" : "Virta (A)"}
+                >
+                  {inputMode === "power" ? (
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0.1"
+                      step="0.1"
+                      value={input.powerW / 1000 || ""}
+                      onChange={(e) => {
+                        const v = parseFloat(e.target.value);
+                        update({ powerW: isNaN(v) ? 0 : v * 1000 });
+                        setActivePreset(null);
+                      }}
+                      className="input-field font-mono text-lg font-semibold"
+                    />
+                  ) : (
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="1"
+                      step="1"
+                      value={directCurrentA || ""}
+                      onChange={(e) => {
+                        const v = parseFloat(e.target.value);
+                        setDirectCurrentA(isNaN(v) ? 0 : v);
+                        setActivePreset(null);
+                      }}
+                      className="input-field font-mono text-lg font-semibold"
+                    />
+                  )}
+                </InputField>
+
+                <InputField label="Vaihe">
+                  <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
+                    {(["1-phase", "3-phase"] as Phase[]).map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => {
+                          update({ phase: p });
+                          setActivePreset(null);
+                        }}
+                        className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                          input.phase === p
+                            ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
+                            : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                        }`}
+                      >
+                        {p === "1-phase" ? "1-vaihe" : "3-vaihe"}
+                      </button>
+                    ))}
+                  </div>
+                </InputField>
+              </div>
+
+              {/* cos φ + ΔU raja */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <InputField label="Tehokerroin (cos φ)">
                   <input
                     type="number"
                     inputMode="decimal"
                     min="0.1"
-                    step="0.1"
-                    value={input.powerW / 1000 || ""}
+                    max="1.0"
+                    step="0.05"
+                    value={input.cosPhi}
                     onChange={(e) => {
                       const v = parseFloat(e.target.value);
-                      update({ powerW: isNaN(v) ? 0 : v * 1000 });
+                      update({ cosPhi: isNaN(v) ? 1.0 : v });
                       setActivePreset(null);
                     }}
-                    className="input-field font-mono text-lg font-semibold"
+                    className="input-field font-mono"
                   />
-                ) : (
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min="1"
-                    step="1"
-                    value={directCurrentA || ""}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value);
-                      setDirectCurrentA(isNaN(v) ? 0 : v);
-                      setActivePreset(null);
-                    }}
-                    className="input-field font-mono text-lg font-semibold"
-                  />
-                )}
+                </InputField>
+
+                {/* ΔU raja toggle */}
+                <InputField label="ΔU raja">
+                  <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
+                    {(["general", "lighting"] as LoadType[]).map((lt) => (
+                      <button
+                        key={lt}
+                        onClick={() => {
+                          update({ loadType: lt });
+                          setActivePreset(null);
+                        }}
+                        className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                          input.loadType === lt
+                            ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
+                            : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                        }`}
+                      >
+                        {lt === "general" ? "5 %" : "3 %"}
+                      </button>
+                    ))}
+                  </div>
+                </InputField>
               </div>
-
-              {/* Vaihe */}
-              <div className="space-y-1.5">
-                <span className="block text-xs font-medium text-[var(--text-muted)]">
-                  Vaihe
-                </span>
-                <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
-                  {(["1-phase", "3-phase"] as Phase[]).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => {
-                        update({ phase: p });
-                        setActivePreset(null);
-                      }}
-                      className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
-                        input.phase === p
-                          ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
-                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                      }`}
-                    >
-                      {p === "1-phase" ? "1-vaihe" : "3-vaihe"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <InputField label="Tehokerroin (cos φ)">
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min="0.1"
-                  max="1.0"
-                  step="0.05"
-                  value={input.cosPhi}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
-                    update({ cosPhi: isNaN(v) ? 1.0 : v });
-                    setActivePreset(null);
-                  }}
-                  className="input-field font-mono"
-                />
-              </InputField>
-
-              {/* ΔU raja toggle */}
-              <InputField label="ΔU raja">
-                <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
-                  {(["general", "lighting"] as LoadType[]).map((lt) => (
-                    <button
-                      key={lt}
-                      onClick={() => {
-                        update({ loadType: lt });
-                        setActivePreset(null);
-                      }}
-                      className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
-                        input.loadType === lt
-                          ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
-                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                      }`}
-                    >
-                      {lt === "general" ? "5 %" : "3 %"}
-                    </button>
-                  ))}
-                </div>
-              </InputField>
             </div>
           </Card>
 
