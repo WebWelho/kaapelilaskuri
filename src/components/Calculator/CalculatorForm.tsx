@@ -155,9 +155,9 @@ export function CalculatorForm() {
           {/* 1. Kuorma */}
           <Card number={1} title="Kuorma">
             <div className="grid gap-4 sm:grid-cols-2">
-              {/* Teho / Virta toggle + syöte */}
-              <div>
-                <div className="mb-1.5 flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
+              {/* Teho / Virta */}
+              <div className="space-y-1.5">
+                <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
                   {(["power", "current"] as InputMode[]).map((m) => (
                     <button
                       key={m}
@@ -203,8 +203,11 @@ export function CalculatorForm() {
                 )}
               </div>
 
-              {/* Vaihe toggle */}
-              <InputField label="Vaihe">
+              {/* Vaihe */}
+              <div className="space-y-1.5">
+                <span className="block text-xs font-medium text-[var(--text-muted)]">
+                  Vaihe
+                </span>
                 <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
                   {(["1-phase", "3-phase"] as Phase[]).map((p) => (
                     <button
@@ -223,7 +226,7 @@ export function CalculatorForm() {
                     </button>
                   ))}
                 </div>
-              </InputField>
+              </div>
 
               <InputField label="Tehokerroin (cos φ)">
                 <input
