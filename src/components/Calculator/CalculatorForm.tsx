@@ -56,9 +56,13 @@ const PROTECTION_OPTIONS: {
   { key: "MCB-K", label: "K", desc: "Teollisuus" },
 ];
 
+type InputMode = "power" | "current";
+
 export function CalculatorForm() {
   const [input, setInput] = useState<CalcInput>(DEFAULT_INPUT);
   const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [inputMode, setInputMode] = useState<InputMode>("power");
+  const [directCurrentA, setDirectCurrentA] = useState(16);
 
   const update = useCallback((changes: Partial<CalcInput>) => {
     setInput((prev) => ({ ...prev, ...changes }));
@@ -77,25 +81,38 @@ export function CalculatorForm() {
     setActivePreset(null);
   }, []);
 
+  const effectiveInput = useMemo<CalcInput>(() => {
+    if (inputMode === "current") {
+      const voltage = input.phase === "1-phase" ? 230 : 400;
+      const multiplier = input.phase === "1-phase" ? 1 : Math.sqrt(3);
+      const powerW = directCurrentA * voltage * multiplier * input.cosPhi;
+      return { ...input, powerW };
+    }
+    return input;
+  }, [input, inputMode, directCurrentA]);
+
   const result = useMemo<{
     data: CalcResult | null;
     error: string | null;
   }>(() => {
-    if (input.powerW <= 0) return { data: null, error: null };
+    if (inputMode === "power" && input.powerW <= 0)
+      return { data: null, error: null };
+    if (inputMode === "current" && directCurrentA <= 0)
+      return { data: null, error: null };
     if (input.cosPhi <= 0 || input.cosPhi > 1)
       return { data: null, error: "Tehokerroin 0.1–1.0" };
     if (input.cableLengthM <= 0)
       return { data: null, error: "Kaapelin pituus > 0" };
 
     try {
-      return { data: calculate(input), error: null };
+      return { data: calculate(effectiveInput), error: null };
     } catch (err) {
       return {
         data: null,
         error: err instanceof Error ? err.message : "Tuntematon virhe",
       };
     }
-  }, [input]);
+  }, [effectiveInput, input, inputMode, directCurrentA]);
 
   return (
     <div className="space-y-6">
@@ -138,21 +155,53 @@ export function CalculatorForm() {
           {/* 1. Kuorma */}
           <Card number={1} title="Kuorma">
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Teho (kW)">
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min="0.1"
-                  step="0.1"
-                  value={input.powerW / 1000 || ""}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
-                    update({ powerW: isNaN(v) ? 0 : v * 1000 });
-                    setActivePreset(null);
-                  }}
-                  className="input-field font-mono text-lg font-semibold"
-                />
-              </InputField>
+              {/* Teho / Virta toggle + syöte */}
+              <div>
+                <div className="mb-1.5 flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-input)] p-1">
+                  {(["power", "current"] as InputMode[]).map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => setInputMode(m)}
+                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                        inputMode === m
+                          ? "bg-[var(--bg-card-hover)] text-[var(--text-accent)] shadow-sm"
+                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                      }`}
+                    >
+                      {m === "power" ? "Teho (kW)" : "Virta (A)"}
+                    </button>
+                  ))}
+                </div>
+                {inputMode === "power" ? (
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min="0.1"
+                    step="0.1"
+                    value={input.powerW / 1000 || ""}
+                    onChange={(e) => {
+                      const v = parseFloat(e.target.value);
+                      update({ powerW: isNaN(v) ? 0 : v * 1000 });
+                      setActivePreset(null);
+                    }}
+                    className="input-field font-mono text-lg font-semibold"
+                  />
+                ) : (
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min="1"
+                    step="1"
+                    value={directCurrentA || ""}
+                    onChange={(e) => {
+                      const v = parseFloat(e.target.value);
+                      setDirectCurrentA(isNaN(v) ? 0 : v);
+                      setActivePreset(null);
+                    }}
+                    className="input-field font-mono text-lg font-semibold"
+                  />
+                )}
+              </div>
 
               {/* Vaihe toggle */}
               <InputField label="Vaihe">
@@ -391,7 +440,9 @@ export function CalculatorForm() {
               </p>
             </div>
           )}
-          {result.data && <ResultPanel input={input} result={result.data} />}
+          {result.data && (
+            <ResultPanel input={effectiveInput} result={result.data} />
+          )}
           {!result.data && !result.error && (
             <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-[var(--border-medium)]">
               <p className="text-center text-sm text-[var(--text-muted)]">
@@ -406,7 +457,7 @@ export function CalculatorForm() {
 
           {/* Projektit */}
           <ProjectBar
-            currentInput={input}
+            currentInput={effectiveInput}
             currentResult={result.data}
             onLoadCircuit={handleLoadCircuit}
           />
