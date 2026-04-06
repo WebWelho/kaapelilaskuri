@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  cacheOnNavigation: true,
+  register: true,
+  reloadOnOnline: true,
+  exclude: [/.map$/, /^manifest.*.js$/],
+});
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);
