@@ -5,7 +5,8 @@
 
 import { VertexAI } from "@google-cloud/vertexai";
 
-const MODEL_NAME = "gemini-2.5-flash";
+// Previous: "gemini-2.5-flash" — fallback if preview is unstable
+const MODEL_NAME = "gemini-3-flash-preview";
 
 function createModel(modelName: string = MODEL_NAME) {
   const credJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
