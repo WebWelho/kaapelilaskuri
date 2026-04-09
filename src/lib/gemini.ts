@@ -5,20 +5,22 @@
 
 import { VertexAI } from "@google-cloud/vertexai";
 
-const MODEL_NAME = "gemini-2.5-flash";
+// Global endpoint: 3.x models not available in europe-west4
+const MODEL_NAME = "gemini-3-flash-preview";
 
 function createModel(modelName: string = MODEL_NAME) {
   const credJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!credJson) {
     throw new Error(
-      "GOOGLE_SERVICE_ACCOUNT_KEY not configured — Vertex AI EU required",
+      "GOOGLE_SERVICE_ACCOUNT_KEY not configured — Vertex AI required",
     );
   }
 
   const credentials = JSON.parse(credJson);
   const vertex = new VertexAI({
     project: credentials.project_id,
-    location: "europe-west4",
+    location: "global",
+    apiEndpoint: "aiplatform.googleapis.com",
     googleAuthOptions: { credentials },
   });
 
