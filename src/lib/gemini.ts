@@ -5,8 +5,9 @@
 
 import { VertexAI } from "@google-cloud/vertexai";
 
-// Global endpoint: 3.x models not available in europe-west4
-const MODEL_NAME = "gemini-3-flash-preview";
+// EU-regional endpoint (GA, data residency taattu)
+// 3.x preview vain global endpoint = ei EU data residency
+const MODEL_NAME = "gemini-2.5-flash";
 
 function createModel(modelName: string = MODEL_NAME) {
   const credJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
