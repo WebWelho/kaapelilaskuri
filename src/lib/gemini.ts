@@ -1,5 +1,5 @@
 /**
- * Vertex AI Gemini client — europe-west4 only.
+ * Vertex AI Gemini client — europe-north1 (Hamina, EU data residency).
  * Vaatii GOOGLE_SERVICE_ACCOUNT_KEY env-muuttujan.
  */
 
@@ -20,8 +20,8 @@ function createModel(modelName: string = MODEL_NAME) {
   const credentials = JSON.parse(credJson);
   const vertex = new VertexAI({
     project: credentials.project_id,
-    location: "global",
-    apiEndpoint: "aiplatform.googleapis.com",
+    location: "europe-north1",
+    apiEndpoint: "europe-north1-aiplatform.googleapis.com",
     googleAuthOptions: { credentials },
   });
 
