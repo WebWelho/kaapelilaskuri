@@ -28,15 +28,20 @@ pnpm build
 pnpm typecheck
 ```
 
-## TPCore v2.1 -orkestraattori
+## 🛠️ TPCore v4 -orkestraattori
 
-**Globaali kanon:** `~/.claude/CLAUDE.md` (16 sääntöä + hard gates).
+Ketju: SEQ → Context7 → Researcher → Suunnitelma → QA → Review.
+Skill: `~/.claude/skills/tpcore/SKILL.md` (auto-aktivoituu).
+Ydinsäännöt: `~/.claude/memory/core_rules.md` (17 kanon).
+Gotchas: `~/.claude/docs/v4-gotchas.md`.
 
-**Sovellus tähän repoon (kevyt standalone):**
-- **Ei Edit/Write ≥3 tied. muutoksella ilman `.handoff/PLAN.md`** (pre-edit-gate.sh blokkaa)
-- **Auto-checkpoint** ennen Edit/Write (refs/testocore-checkpoints/, rollback: `git checkout refs/testocore-checkpoints/<ts> -- .`)
-- **GATE 1-8 ennen commitia:** tsc, build, testit, regressio, **Playwright UI** (laskurin syöte→tuloste golden path), review
-- **Sääntö 16 (Todenna älä luota):** SFS 6000 -laskuri-muutos → vertaile tunnettuun ref-arvoon (esim. 3×2.5mm² 16A 50m → ~1.8V alenema), ei pelkkä tsc-läpäisy
-- **Template-pohjat:** `~/.claude/skills/tpcore/templates/09-16.md`
+**Hookit (~/.claude/hooks/):**
 
-**Dokumentaatio:** [Notion Tilannekuva](https://www.notion.so/3461fc763e01818898abd9f9c4e3ac9d) · [Hard Gates](https://www.notion.so/3461fc763e0181caabd3f24f889e59c5) · [Roadmap](https://www.notion.so/3461fc763e0181c8976bc68d1c9fee30)
+- `pre-commit-gate.sh` — QA (tsc + build + turva; SKIP-VALIDATE commit-viestissä ohittaa)
+- `pre-edit-checkpoint.sh` — auto-checkpoint `refs/testocore-checkpoints/<ts>` (nimi historiallinen)
+- `protect-files.sh` — estää .env/.ssh/migrations/.claude (Edit|Write|MultiEdit)
+- `enforce-tests-on-stop.sh` — pakottaa testit ennen "valmis" (SKIP-VALIDATE PROGRESS.md:ssä ohittaa)
+- `format-on-write.sh` — auto-prettier/ruff/gofmt (fail-open)
+- Muut: session-init/end, github-backup, context-recovery, supabase-gate
+
+Arkistoitu v2.x: user-prompt-gate, pre-edit-gate (~/.claude/\_archive/hooks-v2.x/).
